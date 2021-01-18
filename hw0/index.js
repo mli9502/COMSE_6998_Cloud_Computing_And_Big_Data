@@ -12,14 +12,18 @@ const path = require("path");
  */
 
 const app = exp();
-const port = process.env.PORT || "8080";
+const port = process.env.PORT || "9000";
 
 /**
  *  App Configuration
  */
 
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "pug");
+
 app.get("/", (req, res) => {
-    res.status(200).send("Hello World!");
+    // res.status(200).send("Hello World!");
+    res.render("index", {title: "Home"});
 });
 
 /**
