@@ -1,0 +1,6 @@
+- Frontend
+    - upload frontend in https://console.aws.amazon.com/s3/home?region=us-east-2
+    - frontend endpoint: http://comse-6998-spring-21-hw1.s3-website.us-east-2.amazonaws.com
+    - Need to clear browser cache before the updated files can take effect...
+- [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+- error codes: https://aws.amazon.com/premiumsupport/knowledge-center/api-gateway-troubleshoot-403-forbidden/
