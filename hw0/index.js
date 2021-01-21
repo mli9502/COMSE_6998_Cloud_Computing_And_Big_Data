@@ -23,7 +23,7 @@ app.set("view engine", "pug");
 
 app.get("/", (req, res) => {
     // res.status(200).send("Hello World!");
-    res.render("index", {title: "Home"});
+    res.render("index", {title: "Home!"});
 });
 
 /**
