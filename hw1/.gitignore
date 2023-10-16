@@ -1,0 +1,6 @@
+restaurants_index_config.json
+out.log
+intent_request.json
+sqs_resp.json
+*.zip
+package/

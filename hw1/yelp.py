@@ -3,11 +3,11 @@ import json
 import time
 
 # https://www.yelp.com/developers/v3/manage_app
-apikey = 'HHZ2SmnLGfn0izrik9Adt7vaUJ0rCnAI-VatWUaof6vMlNAYDxNPUVlrRf3kYUKelrR__RvVomXDo-qglgk_1XrT3wIgWS9snmNk41lSdeY9S9bd14QstadLI-QoZXYx'
+apikey = 'Ki0G3hVJfHzHobPc8hMmsLetVogyPX-T7jRzKlUD9Iyc8mud5TjlsC4BYDRx0OeWt6Oy7IrsUxNFy8-E0ZlrCZiZIX1NrMmKH8cUA-7bh0sp2WZ0YN4mx77IIfwoZXYx'
 
 url = "https://api.yelp.com/v3/businesses/search"
 # categories can be found from https://docs.developer.yelp.com/reference/v3_all_categories
-categories = ['newamerican', 'french', 'chinese', 'greek', 'japanese', 'malaysian', 'mediterranean', 'mexican']
+categories = ['newamerican', 'french', 'chinese', 'greek', 'japanese', 'malaysian', 'mediterranean', 'mexican', 'chicken_wings']
 
 headers = {
     "accept": "application/json",
@@ -21,7 +21,7 @@ for category in categories:
     resp_per_category[category] = {}
     print('category: ', category)
     for offset in range(0, 1000, 50):
-        time.sleep(0.5)
+        time.sleep(1)
         params = {
             'limit': 50,
             'location': 'New+York',
