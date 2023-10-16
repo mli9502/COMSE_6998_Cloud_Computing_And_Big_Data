@@ -1,5 +1,7 @@
 Mengwen Li (ml4643)
 
+Github repo: https://github.com/mli9502/COMSE_6998_Cloud_Computing_And_Big_Data/tree/master/hw1
+
 1. Frontend code: ./cloud-hw1-starter-updated
 2. All Lambda Functions: `LF0.py`, `LF1.py`, `LF2.py`
 3. YAML file generated through API Gateway: `exported_from_api_gateway.yaml`
