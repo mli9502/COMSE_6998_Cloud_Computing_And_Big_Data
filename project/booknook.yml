@@ -341,7 +341,7 @@ paths:
           description: Invalid username supplied
         '404':
           description: User not found
-  /user/setPreference:
+  '/user/{user_id}/setPreference':
     put:
       tags:
         - user
@@ -452,7 +452,3 @@ components:
           scopes:
             write: Grants write access
             read: Grants read access
-    api_key:
-      type: apiKey
-      name: api_key
-      in: header
