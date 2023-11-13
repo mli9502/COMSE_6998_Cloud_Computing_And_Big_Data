@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="This is a starter project for a chatbot concierge application built on AWS.">
+    <meta name="author" content="Mengwen Li">
+
+    <title>Image System</title>
+
+
+
+    <!-- api gateway generated sdk -->
+    <script src="./lib/axios/dist/axios.standalone.js"></script>
+    <script src="./lib/CryptoJS/rollups/hmac-sha256.js"></script>
+    <script src="./lib/CryptoJS/rollups/sha256.js"></script>
+    <script src="./lib/CryptoJS/components/hmac.js"></script>
+    <script src="./lib/CryptoJS/components/enc-base64.js"></script>
+    <script src="./lib/url-template/url-template.js"></script>
+    <script src="./lib/apiGatewayCore/sigV4Client.js"></script>
+    <script src="./lib/apiGatewayCore/apiGatewayClient.js"></script>
+    <script src="./lib/apiGatewayCore/simpleHttpClient.js"></script>
+    <script src="./lib/apiGatewayCore/utils.js"></script>
+
+    <script src="./apigClient.js"></script>
+    <script src="./aws-sdk.min.js"></script>
+
+
+</head>
+
+
+<body>
+    <h1>Image search</h1>
+    <p>Search by text</p>
+    <div class="topnav">
+        <form id="search-container">
+            <input id = "search" type="text" placeholder="Search..">
+            <button type="submit">Submit</button>
+            <button type="button" onclick="runSpeechRecognition()">Transcribe</button>
+            <span id="action"></span>
+
+        </form>
+    </div>
+
+
+    <h1>Image upload</h1>
+    <p>Upload the image file</p>
+    <form id="imageForm">
+        <label for="tags">Tags:</label>
+        <input id="tagInput" type="text">
+        <input id="imageInput" type="file" accept="image/*">
+        <button type="sumbit">Upload</button>
+    </form>
+
+
+    <h1>Image Viewer</h1>
+    <div id="viewer">
+
+
+    <script>
+        var sdk = apigClientFactory.newClient({});
+        const searchQuery = document.querySelector("#search-container")
+        const text = document.querySelector("#search")
+        const imageForm = document.querySelector("#imageForm")
+        const imageInput = document.querySelector("#imageInput")
+        const tagInput = document.querySelector("#tagInput")
+        let query = ""
+        let image = ""
+        let tag = ""
+
+        function getHtml(template) {
+            return template.join('\n');
+        }
+
+        searchQuery.addEventListener("input", () => {
+            query = text.value;
+            console.log(query)
+        })
+
+        function runSpeechRecognition(){
+            console.log("start listening")
+            var output = document.getElementById("output")
+            var action = document.getElementById("action")
+            var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+            var recognition = new SpeechRecognition();
+            console.log(recognition)
+
+            recognition.onstart = function() {
+                action.innerHTML = "Listening..."
+            }
+
+            // recognition.onspeechend = function() {
+            //     action.innerHTML = "Stop listening"
+            // }
+
+            recognition.onresult = function (event) {
+                console.log("Result out")
+                var transcript = event.results[0][0].transcript
+                console.log(transcript)
+                action.innerHTML = "You said: '" + transcript + "' as a tag. Please directly click Submit botton"
+                query = transcript;
+            }
+
+            recognition.start();
+        }
+
+        searchQuery.addEventListener("submit", (e) => {
+            e.preventDefault()
+            sendQueryToServer(query)
+        })
+
+
+        function sendQueryToServer(query){
+            var display = "";
+            console.log('searching image');
+            sdk.searchGet({
+                'q': query
+            }, {}, {
+                    headers: {
+                        'Accept': '*/*',
+                    }
+                })
+            .then((response) => {
+                console.log(response);
+                var data = response.data;
+                if (data.results && data.results.length == 0) {
+                    console.log('received ' + data.results.length + ' images');
+                    display += getHtml([
+                    '<div>',
+                    'No image found for tag "' + query, '"',
+                    '</div>',
+                    ])
+                }
+                else{
+                    var results = data.results;
+                    for (var result of results) {
+                        console.log("result");
+                        console.log(result);
+                        display += getHtml([
+                        '<div>',
+                        '<img style="width:128px;height:128px;" src="' + result.url + '"/>',
+                        '</div>',
+                        ])
+                    }
+                }
+                console.log("display...")
+                console.log(display)
+                document.getElementById('viewer').innerHTML = display
+            })
+        }
+
+
+        imageForm.addEventListener("input", () => {
+            tags = tagInput.value;
+            console.log(tags)
+        })
+
+        imageForm.addEventListener("change", () => {
+            const file = imageInput.files[0]
+            console.log(file)
+            image = file
+        })
+
+        imageForm.addEventListener("submit", (e) => {
+            e.preventDefault()
+            sendImageToServer()
+        })
+
+        function sendImageToServer() {
+            console.log('uploading image');
+
+            function base64String(dataURL) {
+                return dataURL.split(",")[1]
+            }
+
+            var reader = new FileReader();
+            reader.onloadend = function () {
+                b64s = base64String(reader.result)
+                console.log('Encoded Base 64 File String:', b64s);
+                sdk.uploadObjectPut({
+                    'object': image.name,
+                    'x-amz-meta-customlabels': tags
+                },
+                b64s,
+                {
+                    headers: {
+                        'Content-Type': 'text/base64',
+                        'Accept': 'text/base64',
+                    }
+                })
+            }
+            reader.readAsDataURL(image);
+
+
+            // const formData = new FormData(imageForm)
+            // formData.append(`file1`, image)
+
+            // fetch("upload", {
+            //   method: "POST",
+            //   body: formData
+            // })
+
+            // .then(response => {
+            //   if(response.status !== 200) throw Error(response.statusText)
+            //   location.reload()
+            // })
+
+            // .catch(error => {
+            //   console.log(error)
+            // })
+        }
+
+
+
+
+        function searchImage() {
+
+        }
+
+
+    </script>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!-- image js -->
+    <!--     <script src="./assets/js/image.js"></script> -->
+
+
+
+</body>
+
+</html>
